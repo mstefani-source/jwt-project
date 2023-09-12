@@ -2,12 +2,17 @@ import 'dotenv/config'
 import { conn } from './config/database.js'
 import express, { json } from "express";
 import { findOne, create } from "./model/user.js";
-
+//import {json as js, urlencoded } from "body-parser";
+import pkg from 'body-parser';
+const {json: js, urlencoded } = pkg;
 const app = express();
 
 conn()
 
 app.use(json());
+
+app.use(js());
+app.use(urlencoded({extended: true}))
 
 // Logic goes here
 
@@ -77,12 +82,29 @@ app.post("/register", async (req, res) => {
 // Login
 app.post("/login", (req, res) => {
 	// our login logic goes here
-	console.log("query: ", req.query)
-	console.log("body: ", req.body)
-	console.log("route: ", req.route.path)
-	console.log("params: ", req.params)
-	console.log("raw headers: ", req.rawHeaders)
+	try {
+		console.log("query: ", req.query)
+		console.log("body: ", req.body)
+		console.log("route: ", req.route.path)
+		console.log("params: ", req.params)
+		console.log("headers: ", req.headers)
+	
+		//console.log("x-www: ", req.resume(hostname))
 
+		const { email, password } = req.body;
+
+		// Validate user input
+		if (!(email && password)) {
+			res.status(400).send("application: All inputs are required")
+		} else {
+
+			// user
+
+			res.status(200).send("data OK")
+		}
+	}catch(e){
+		console.log(e)
+	}
 });
 
 export default app;
