@@ -4,7 +4,7 @@ import express, { json } from "express";
 import { findOne, create } from "./model/user.js";
 //import {json as js, urlencoded } from "body-parser";
 import pkg from 'body-parser';
-const {json: js, urlencoded } = pkg;
+const { json: js, urlencoded } = pkg;
 const app = express();
 
 conn()
@@ -12,7 +12,7 @@ conn()
 app.use(json());
 
 app.use(js());
-app.use(urlencoded({extended: true}))
+app.use(urlencoded({ extended: true }))
 
 // Logic goes here
 
@@ -83,13 +83,14 @@ app.post("/register", async (req, res) => {
 app.post("/login", (req, res) => {
 	// our login logic goes here
 	try {
-		console.log("query: ", req.query)
-		console.log("body: ", req.body)
-		console.log("route: ", req.route.path)
-		console.log("params: ", req.params)
-		console.log("headers: ", req.headers)
-	
-		//console.log("x-www: ", req.resume(hostname))
+
+		const { query, body, route, params, headers } = req;
+
+		console.log("query: ", query)
+		console.log("body: ", body)
+		console.log("route: ", route.path)
+		console.log("params: ", params)
+		console.log("headers.content-type: ", headers["content-type"])
 
 		const { email, password } = req.body;
 
@@ -102,7 +103,7 @@ app.post("/login", (req, res) => {
 
 			res.status(200).send("data OK")
 		}
-	}catch(e){
+	} catch (e) {
 		console.log(e)
 	}
 });
