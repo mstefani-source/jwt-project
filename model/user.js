@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-export const findOne = (email) => {return true};
+
 export const create = () => {}
 
 const userSchema = new Schema({

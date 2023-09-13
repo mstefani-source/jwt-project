@@ -1,29 +1,34 @@
 import 'dotenv/config'
 import { conn } from './config/database.js'
 import express, { json } from "express";
-import { findOne, create } from "./model/user.js";
-//import {json as js, urlencoded } from "body-parser";
+import User from "./model/user.js";
+import alljwt from 'jsonwebtoken';
+const {jwt} = alljwt 
+
 import pkg from 'body-parser';
 const { json: js, urlencoded } = pkg;
+
+import crypt from "bcryptjs";
+const { hash } = crypt
+
+
 const app = express();
-
-conn()
-
 app.use(json());
-
 app.use(js());
 app.use(urlencoded({ extended: true }))
 
+
+
+
+conn()
 // Logic goes here
 
 // importing user context
 
-// import { hash } from "bcryptjs/dist/bcrypt.js";
 
 // const bcrypt = require('bcryptjs');
 // const salt = bcrypt.genSaltSync(10)
 // const hash = bcrypt.hashSync(password, salt)
-
 // Register
 app.post("/register", async (req, res) => {
 	// our register logic goes here...
@@ -38,21 +43,21 @@ app.post("/register", async (req, res) => {
 		}
 		// check if user already exist
 		// Validate if user exist in our database
-		const oldUser = await findOne({ email })
+		const oldUser = await User.findOne({ email })
 
 		if (oldUser) {
 			return res.status(409).send("User Already Exist. Please Login");
 		}
 
 		// Encrypt user password
-		encryptedPassword = await hash(password, 10);
+		const encryptedPassword = await hash(password, 10);
 
 		// Create user in our database
 
-		const user = await create({
+		const user = await User.create({
 			first_name,
 			last_name,
-			email: email.toLoweCase(),
+			email: email.toLowerCase(),
 			password: encryptedPassword,
 		})
 
@@ -80,7 +85,7 @@ app.post("/register", async (req, res) => {
 });
 
 // Login
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
 	// our login logic goes here
 	try {
 
@@ -100,8 +105,11 @@ app.post("/login", (req, res) => {
 		} else {
 
 			// user
-
-			res.status(200).send("data OK")
+			const user = await User.findOne({ email });
+			if (user) {
+				res.status(200).json(user)
+			}
+			res.status(400).send('application: Invalid Credentials')
 		}
 	} catch (e) {
 		console.log(e)
