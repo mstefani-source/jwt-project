@@ -1,4 +1,5 @@
-import { verify } from "jsonwebtoken";
+import pkg from 'jsonwebtoken';
+const { verify } = pkg;
 
 const config = process.env;
 

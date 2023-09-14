@@ -2,14 +2,17 @@ import 'dotenv/config'
 import { conn } from './config/database.js'
 import express, { json } from "express";
 import User from "./model/user.js";
+
+import auth from "./middleware/auth.js"
+
 import alljwt from 'jsonwebtoken';
-const {jwt} = alljwt 
+const { jwt } = alljwt
 
 import pkg from 'body-parser';
 const { json: js, urlencoded } = pkg;
 
 import crypt from "bcryptjs";
-const { hash } = crypt
+const { hash, compare } = crypt
 
 
 const app = express();
@@ -39,7 +42,7 @@ app.post("/register", async (req, res) => {
 
 		// Validate user input
 		if (!(email && password && first_name && last_name)) {
-			res.status(400).send("All input is reqired")
+			return res.status(400).send("All input is reqired")
 		}
 		// check if user already exist
 		// Validate if user exist in our database
@@ -58,7 +61,7 @@ app.post("/register", async (req, res) => {
 			first_name,
 			last_name,
 			email: email.toLowerCase(),
-			password: encryptedPassword,
+			password: encryptedPassword
 		})
 
 		// Create token
@@ -74,7 +77,7 @@ app.post("/register", async (req, res) => {
 		user.token = token;
 
 		// return new user
-		res.status(201).json(user);
+		return res.status(201).json(user);
 
 		// Our register logic ends here	
 
@@ -97,23 +100,43 @@ app.post("/login", async (req, res) => {
 		console.log("params: ", params)
 		console.log("headers.content-type: ", headers["content-type"])
 
+
+
 		const { email, password } = req.body;
 
 		// Validate user input
 		if (!(email && password)) {
-			res.status(400).send("application: All inputs are required")
-		} else {
+			return res.status(400).send("application: All inputs are required")
+		}// else {
+		// user
+		const user = await User.findOne({ email });
 
-			// user
-			const user = await User.findOne({ email });
-			if (user) {
-				res.status(200).json(user)
-			}
-			res.status(400).send('application: Invalid Credentials')
+		if (user && (await compare(password, user.password))) {
+
+
+			console.log("process.env.TOKEN_KEY", process.env.TOKEN_KEY)
+			console.log("user._id", user._id)
+
+			// Create token
+//			const token = jwt.sign({ user_id: user._id, email }, process.env.TOKEN_KEY, { expiresIn: "2h" });
+			const token = jwt.sign();
+
+
+			// save user token
+			user.token = token;
+
+			return res.status(200).json(user)
 		}
+		return res.status(400).send('application: Invalid Credentials')
+
+		//	}
 	} catch (e) {
 		console.log(e)
 	}
+});
+
+app.post("/welcome", auth, (req, res) => {
+	res.status(200).send("Welcome !!");
 });
 
 export default app;
