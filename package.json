@@ -13,11 +13,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "folder": "^0.0.4",
+    "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.5.0"
+    "mongoose": "^7.5.2",
+    "tarball": "^0.0.5",
+    "url": "^0.11.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.3",

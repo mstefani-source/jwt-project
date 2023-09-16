@@ -2,18 +2,14 @@ import 'dotenv/config'
 import { conn } from './config/database.js'
 import express, { json } from "express";
 import User from "./model/user.js";
-
 import auth from "./middleware/auth.js"
-
-import alljwt from 'jsonwebtoken';
-const { jwt } = alljwt
+import jwt from 'jsonwebtoken'
 
 import pkg from 'body-parser';
 const { json: js, urlencoded } = pkg;
 
 import crypt from "bcryptjs";
 const { hash, compare } = crypt
-
 
 const app = express();
 app.use(json());
@@ -29,9 +25,7 @@ conn()
 // importing user context
 
 
-// const bcrypt = require('bcryptjs');
-// const salt = bcrypt.genSaltSync(10)
-// const hash = bcrypt.hashSync(password, salt)
+
 // Register
 app.post("/register", async (req, res) => {
 	// our register logic goes here...
@@ -65,12 +59,7 @@ app.post("/register", async (req, res) => {
 		})
 
 		// Create token
-		const token = jwt.sign(
-			{ user_id: user._id, email },
-			process.env.TOKEN_KEY,
-			{
-				expiresIn: "2h",
-			}
+		const token = jwt.sign({ user_id: user._id, email }, process.env.TOKEN_KEY, { expiresIn: "2h" }
 		);
 		// save user token
 
@@ -94,11 +83,11 @@ app.post("/login", async (req, res) => {
 
 		const { query, body, route, params, headers } = req;
 
-		console.log("query: ", query)
-		console.log("body: ", body)
-		console.log("route: ", route.path)
-		console.log("params: ", params)
-		console.log("headers.content-type: ", headers["content-type"])
+		// console.log("query: ", query)
+		// console.log("body: ", body)
+		// console.log("route: ", route.path)
+		// console.log("params: ", params)
+		// console.log("headers.content-type: ", headers["content-type"])
 
 
 
@@ -113,13 +102,14 @@ app.post("/login", async (req, res) => {
 
 		if (user && (await compare(password, user.password))) {
 
-
-			console.log("process.env.TOKEN_KEY", process.env.TOKEN_KEY)
-			console.log("user._id", user._id)
+			let jwtSecretKey = process.env.TOKEN_KEY
+			let data = { 
+				user_id: user._id,
+				email: email 
+			}
 
 			// Create token
-//			const token = jwt.sign({ user_id: user._id, email }, process.env.TOKEN_KEY, { expiresIn: "2h" });
-			const token = jwt.sign();
+			const token = jwt.sign(data, jwtSecretKey, { expiresIn: "2h" });
 
 
 			// save user token
